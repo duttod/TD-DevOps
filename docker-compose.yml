@@ -1,0 +1,37 @@
+version: '3.8'  # Version du format de Docker Compose utilisé dans ce fichier
+services:  # Définition des services Docker
+
+  flask:  # Service pour l'application Flask
+    image: projet/flask-app:V0.1  # Utilisation de l'image Docker pré-construite pour Flask
+    build:  # Construction personnalisée de l'image
+      context: ./App  # Chemin vers le répertoire contenant le Dockerfile pour la construction de l'image
+    ports:  # Configuration des ports à exposer
+      - "5000:5000"  # Mapping du port 5000 de l'hôte sur le port 5000 du conteneur
+    environment:  # Configuration des variables d'environnement pour l'application Flask
+      - MONGO_HOST=mongo  # Hôte MongoDB
+      - MONGO_PORT=27017  # Port MongoDB
+      - MONGO_DB=devops  # Nom de la base de données MongoDB
+      - MONGO_COLLECTION=users  # Nom de la collection MongoDB
+      - MONGO_USERNAME=root  # Nom d'utilisateur MongoDB
+      - MONGO_PASSWORD=test1234  # Mot de passe MongoDB
+    depends_on:  # Dépendance du service Flask vis-à-vis du service MongoDB
+      - mongo
+    networks:  # Configuration du réseau pour la communication entre les services
+      - network-falsk-mongo
+
+  mongo:  # Service pour la base de données MongoDB
+    image: mongo:latest  # Utilisation de l'image Docker officielle de MongoDB
+    hostname: mongo.com  # Nom d'hôte pour le conteneur MongoDB
+    environment:  # Configuration des variables d'environnement pour MongoDB
+      - MONGO_INITDB_ROOT_USERNAME=root  # Nom d'utilisateur root pour l'initialisation de la base de données
+      - MONGO_INITDB_ROOT_PASSWORD=test1234  # Mot de passe root pour l'initialisation de la base de données
+    ports:  # Configuration des ports à exposer
+      - "27017:27017"  # Mapping du port 27017 de l'hôte sur le port 27017 du conteneur MongoDB
+    volumes:  # Configuration des volumes pour la persistance des données
+      - ./db/init.js:/docker-entrypoint-initdb.d/init.js:ro  # Mapping du script d'initialisation MongoDB
+    networks:  # Configuration du réseau pour la communication entre les services
+      - network-falsk-mongo
+
+networks:  # Définition des réseaux Docker
+  network-falsk-mongo:  # Configuration du réseau pour la communication entre les services
+    driver: bridge  # Type de pilote de réseau utilisé (bridge dans ce cas)

@@ -1,0 +1,24 @@
+name: Docker Tests  # Nom du workflow GitHub Actions
+
+on:  # Déclencheurs du workflow, dans ce cas, un push sur la branche "main"
+  push:
+    branches: [ "main" ]
+
+jobs:  # Définition des tâches à exécuter dans le workflow
+
+  pytest:  # Nom de la tâche, dans ce cas, exécution des tests Pytest
+    runs-on: ubuntu-latest  # Système d'exploitation sur lequel les tâches seront exécutées
+
+    steps:  # Étapes à exécuter dans la tâche
+
+    - name: Checkout du code  # Étape de récupération du code source
+      uses: actions/checkout@v3  # Utilisation de l'action "checkout" pour récupérer le code du dépôt
+
+    - name: Installation des dépendances  # Étape d'installation des dépendances Python
+      run: |  # Commandes à exécuter dans l'étape, utilisant un script multi-lignes
+        python -m pip install --upgrade pip
+        pip install -r ./App/requirements.txt  
+
+    - name: Exécution des tests Pytest  # Étape d'exécution des tests Pytest
+      run: |  # Commandes à exécuter dans l'étape, utilisant un script multi-lignes
+        pytest

@@ -1,0 +1,31 @@
+name: Docker Image CI  # Nom de l'action GitHub
+
+on:  # Événement déclencheur de l'action
+  workflow_run:  # Déclenché lorsqu'un workflow spécifique est exécuté
+    workflows: [Docker Tests]  # Déclenche uniquement lorsque le workflow "Docker Tests" est exécuté
+    types: [completed]  # Déclenche uniquement lorsque le workflow spécifié est terminé
+
+jobs:  # Définition des jobs à exécuter lors de l'événement déclencheur
+
+  on-success:  # Job à exécuter en cas de succès du workflow
+    runs-on: ubuntu-latest  # Utilisation de l'image Ubuntu la plus récente pour exécuter le job
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # Condition pour exécuter le job uniquement en cas de succès du workflow
+
+    steps:  # Étapes à exécuter dans le job
+      - uses: actions/checkout@v3  # Récupération du code source du référentiel
+
+      - name: Build the Docker image  # Nom de l'étape pour construire l'image Docker
+        run: docker build ./App -t ${{ secrets.DOCKER_USERNAME }}/projet-flask-v0.1:${{ github.sha }}  # Commande pour construire l'image Docker avec des tags spécifiques
+
+      - name: Log in to Docker Registry  # Nom de l'étape pour se connecter au registre Docker
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login docker.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin  # Commande pour se connecter au registre Docker en utilisant les secrets du référentiel
+
+      - name: Push the Docker image  # Nom de l'étape pour pousser l'image Docker vers le registre
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/projet-flask-v0.1:${{ github.sha }}  # Commande pour pousser l'image Docker vers le registre en utilisant les secrets du référentiel
+
+  on-failure:  # Job à exécuter en cas d'échec du workflow
+    runs-on: ubuntu-latest  # Utilisation de l'image Ubuntu la plus récente pour exécuter le job
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}  # Condition pour exécuter le job uniquement en cas d'échec du workflow
+    
+    steps:  # Étapes à exécuter dans le job
+      - run: echo 'Le workflow ne s'est pas éxécuter car les tests ont échoués'  # Affichage d'un message en cas d'échec des tests
