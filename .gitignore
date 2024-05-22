@@ -1,1 +1,4 @@
 __pycache__*
+/workspace/TD-DevOps/App/__pycache__
+/workspace/TD-DevOps/App/.pytest_cache
+/workspace/TD-DevOps/App/routes/__pycache__
